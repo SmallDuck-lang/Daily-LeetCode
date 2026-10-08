@@ -15,9 +15,14 @@ import json
 import os
 import re
 import subprocess
+import sys
+import traceback
 from pathlib import Path
 from urllib import request, error
 from datetime import datetime
+
+if sys.version_info < (3, 8):
+    sys.exit("需要 Python 3.8 或更高版本，当前版本：" + ".".join(map(str, sys.version_info[:3])))
 
 ROOT = Path(__file__).resolve().parent.parent
 PROBLEMS_DIR = ROOT / "problems"
@@ -103,7 +108,9 @@ def run_git(args, check=True):
 
 
 def main():
+    print(f"Python 版本：{sys.version}", flush=True)
     cookie = os.environ.get("LEETCODE_COOKIE", "").strip()
+    print(f"Cookie 长度：{len(cookie)}", flush=True)
     if not cookie:
         print("❌ 请先设置环境变量 LEETCODE_COOKIE")
         print('   示例：$env:LEETCODE_COOKIE = "LEETCODE_SESSION=xxx; csrftoken=yyy"')
@@ -192,4 +199,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        # 有些终端 stderr 不显示，同时输出到 stdout
+        print(f"❌ 脚本异常：{e}", flush=True)
+        traceback.print_exc()
+        input("\n按 Enter 键退出...")
