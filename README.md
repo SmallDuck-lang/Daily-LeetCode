@@ -30,8 +30,11 @@ Daily-LeetCode
 │   └── TEMPLATE.md
 ├── problems/                 # LeetHub 自动同步 / 手动存放题解代码
 ├── scripts/
-│   └── update_readme.py      # 自动拉取 LeetCode 统计并更新 README
+│   ├── update_readme.py      # 自动拉取 LeetCode 统计并更新 README
+│   └── sync_leetcode_cn.py   # 从 leetcode.cn 拉取 AC 代码并推送（无需插件）
 ├── config.json               # 你的 LeetCode 用户名等配置
+├── sync.bat                  # Windows 双击运行同步脚本
+├── sync.ps1                  # PowerShell 版同步脚本
 └── README.md                 # 本文件
 ```
 
@@ -52,19 +55,45 @@ Daily-LeetCode
 
 ## 🛠️ 使用方式
 
-### 方案 A：自动同步（推荐）
+### 方案 A：Python 自动同步（推荐 · 无需插件）
 
-1. **在 Edge 中安装 Chrome 扩展**：
-   - 打开 `edge://extensions/`
-   - 左下角打开 **开发人员模式** 和 **允许来自其他应用商店的扩展**
-   - 访问 Chrome 应用商店，搜索 **LeetHub**（或 **LeetHub v2**）
-   - 点击“添加”并授权访问 `github.com`
-2. 在 LeetHub 设置中选择仓库 `SmallDuck-lang/Daily-LeetCode`
-3. 在 leetcode.cn 做题并提交通过后，代码会自动 push 到本仓库
+因为 Chrome 应用商店在国内可能打不开，本仓库内置了一个 Python 脚本，可以直接从 leetcode.cn 拉取你的 Accepted 代码并推送到 GitHub。
 
-> 如果 Chrome 应用商店打不开，可以先使用方案 B，之后有空再折腾 CRX 文件安装。
+**第一步：获取 Cookie**
 
-### 方案 B：手动 commit（最稳）
+1. 打开 https://leetcode.cn 并登录
+2. 按 `F12` → `Application/应用` → `Cookies` → `https://leetcode.cn`
+3. 复制 `LEETCODE_SESSION` 和 `csrftoken` 的值
+
+**第二步：运行同步脚本**
+
+PowerShell 方式：
+
+```powershell
+cd E:\daily-leetcode
+$env:LEETCODE_COOKIE = "LEETCODE_SESSION=xxx; csrftoken=yyy"
+python scripts/sync_leetcode_cn.py
+```
+
+或者双击运行 `sync.bat`，按提示粘贴 Cookie 即可。
+
+脚本会：
+- 拉取你最近 100 条提交
+- 把 Accepted 代码写入 `problems/<slug>.js`
+- 自动 `git add / commit / push`
+
+> 每个题目只保留最新一次 Accepted 代码，避免仓库里一堆重复提交。
+
+### 方案 B：LeetHub 插件（如果你能打开 Chrome 应用商店）
+
+1. 打开 `edge://extensions/`
+2. 左下角打开 **开发人员模式** 和 **允许来自其他应用商店的扩展**
+3. 访问 Chrome 应用商店，搜索 **LeetHub**（或 **LeetHub v2**）
+4. 点击“添加”并授权访问 `github.com`
+5. 在 LeetHub 设置中选择仓库 `SmallDuck-lang/Daily-LeetCode`
+6. 在 leetcode.cn 做题并提交通过后，代码会自动 push 到本仓库
+
+### 方案 C：手动 commit（最稳）
 
 每 AC 一题后：
 
