@@ -74,9 +74,15 @@ def fetch_json(url, cookie, csrf=None):
     req = build_request(url, cookie, csrf)
     try:
         with request.urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read().decode("utf-8"))
+            raw = resp.read().decode("utf-8", errors="replace")
+            try:
+                return json.loads(raw)
+            except json.JSONDecodeError as je:
+                print("力扣返回的不是 JSON，可能是风控页面或登录失效。", flush=True)
+                print(f"原始响应前 500 字：{raw[:500]}", flush=True)
+                raise RuntimeError(f"JSON 解析失败：{je}") from je
     except error.HTTPError as e:
-        body = e.read().decode("utf-8")[:1000]
+        body = e.read().decode("utf-8", errors="replace")[:1000]
         raise RuntimeError(f"HTTP {e.code}: {body}") from e
 
 
