@@ -3,12 +3,7 @@
 从 leetcode.cn 拉取最近 Accepted 提交，自动写入 problems/ 并推送到 GitHub。
 
 用法：
-    1. 登录 leetcode.cn
-    2. 浏览器按 F12 -> Application/应用 -> Cookies -> https://leetcode.cn
-    3. 复制 LEETCODE_SESSION 和 csrftoken 的值
-    4. 在 PowerShell 中执行：
-         $env:LEETCODE_COOKIE = "LEETCODE_SESSION=xxx; csrftoken=yyy"
-         python scripts/sync_leetcode_cn.py
+    双击 sync.bat 运行，按提示粘贴 Cookie 即可。
 """
 
 import json
@@ -24,10 +19,17 @@ from datetime import datetime
 if sys.version_info < (3, 8):
     sys.exit("需要 Python 3.8 或更高版本，当前版本：" + ".".join(map(str, sys.version_info[:3])))
 
-# Windows GBK 终端兼容：强制输出流为 UTF-8，避免 emoji/中文打印崩溃
+# Windows GBK 终端兼容：强制输出流为 UTF-8
 for _stream in (sys.stdout, sys.stderr):
     try:
         _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+# Windows 下 input 读取中文需要 UTF-8 编码
+if sys.platform == "win32":
+    try:
+        sys.stdin.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
 
@@ -56,8 +58,11 @@ LANG_EXT = {
 
 def build_request(url, cookie, csrf=None):
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Referer": "https://leetcode.cn/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        "Referer": "https://leetcode.cn/submissions/",
+        "X-Requested-With": "XMLHttpRequest",
         "Cookie": cookie,
     }
     if csrf:
@@ -71,11 +76,11 @@ def fetch_json(url, cookie, csrf=None):
         with request.urlopen(req, timeout=30) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except error.HTTPError as e:
-        body = e.read().decode("utf-8")[:800]
+        body = e.read().decode("utf-8")[:1000]
         raise RuntimeError(f"HTTP {e.code}: {body}") from e
 
 
-def get_all_submissions(cookie, csrf, limit=50):
+def get_all_submissions(cookie, csrf, limit=100):
     """分页拉取最近提交记录。"""
     submissions = []
     offset = 0
@@ -102,19 +107,33 @@ def run_git(args, check=True):
     return subprocess.run(["git"] + args, cwd=ROOT, check=check)
 
 
+def prompt_cookie():
+    print("==================================================", flush=True)
+    print("  LeetCode 中国站题解同步脚本", flush=True)
+    print("==================================================", flush=True)
+    print("", flush=True)
+    print("请先在浏览器中获取 Cookie：", flush=True)
+    print("  第一步：打开 leetcode.cn 并登录", flush=True)
+    print("  第二步：按 F12 打开开发者工具", flush=True)
+    print("  第三步：切换到 Application 或 应用 选项卡", flush=True)
+    print("  第四步：左侧选择 Cookies 下的 leetcode.cn", flush=True)
+    print("  第五步：复制 LEETCODE_SESSION 和 csrftoken 的值", flush=True)
+    print("", flush=True)
+    print("格式：LEETCODE_SESSION=xxx; csrftoken=yyy", flush=True)
+    cookie = input("请粘贴 Cookie：").strip()
+    return cookie
+
+
 def main():
     print(f"Python 版本：{sys.version}", flush=True)
 
     cookie = os.environ.get("LEETCODE_COOKIE", "").strip()
+    if not cookie:
+        cookie = prompt_cookie()
+
     print(f"Cookie 长度：{len(cookie)}", flush=True)
     if not cookie:
-        print("请先设置环境变量 LEETCODE_COOKIE", flush=True)
-        print('示例：$env:LEETCODE_COOKIE = "LEETCODE_SESSION=xxx; csrftoken=yyy"', flush=True)
-        print("", flush=True)
-        print("获取 Cookie 步骤：", flush=True)
-        print("   登录 leetcode.cn", flush=True)
-        print("   按 F12 -> Application/应用 -> Cookies -> https://leetcode.cn", flush=True)
-        print("   复制 LEETCODE_SESSION 和 csrftoken 的值", flush=True)
+        print("Cookie 为空，已退出。", flush=True)
         return
 
     csrf_match = re.search(r"csrftoken=([^;]+)", cookie)
@@ -125,7 +144,11 @@ def main():
         submissions = get_all_submissions(cookie, csrf, limit=100)
     except Exception as e:
         print(f"拉取失败：{e}", flush=True)
-        print("常见原因：Cookie 过期、未登录、或网络连不上 leetcode.cn", flush=True)
+        print("", flush=True)
+        print("常见原因：", flush=True)
+        print("  1. Cookie 过期或复制不完整（需要包含 LEETCODE_SESSION 和 csrftoken）", flush=True)
+        print("  2. 未登录 leetcode.cn", flush=True)
+        print("  3. 网络连不上 leetcode.cn", flush=True)
         return
 
     if not submissions:
