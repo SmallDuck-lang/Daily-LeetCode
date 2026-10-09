@@ -3,7 +3,10 @@
 #       或直接运行：.\sync.ps1
 
 $ErrorActionPreference = "Stop"
+$env:PYTHONIOENCODING = "utf-8"
 Set-Location -Path "E:\daily-leetcode"
+
+$PythonExe = "C:\Users\冯婉怡\.workbuddy\binaries\python\versions\3.14.3\python.exe"
 
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host "  LeetCode 中国站题解同步脚本" -ForegroundColor Cyan
@@ -18,7 +21,7 @@ Write-Host ""
 $cookie = Read-Host -Prompt "请粘贴 Cookie（格式 LEETCODE_SESSION=xxx; csrftoken=yyy）"
 $env:LEETCODE_COOKIE = $cookie
 
-python scripts/sync_leetcode_cn.py
+& $PythonExe scripts/sync_leetcode_cn.py
 
 Write-Host ""
 Read-Host -Prompt "按 Enter 键退出"

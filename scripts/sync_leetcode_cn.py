@@ -24,6 +24,13 @@ from datetime import datetime
 if sys.version_info < (3, 8):
     sys.exit("需要 Python 3.8 或更高版本，当前版本：" + ".".join(map(str, sys.version_info[:3])))
 
+# Windows GBK 终端兼容：强制输出流为 UTF-8，避免 emoji/中文打印崩溃
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 ROOT = Path(__file__).resolve().parent.parent
 PROBLEMS_DIR = ROOT / "problems"
 STATE_FILE = PROBLEMS_DIR / ".sync_state.json"
