@@ -1,4 +1,4 @@
-// 三数之和  排序+双指针  //时间O (n²) 空间：O (1)
+// 三数之和  排序+双指针  //时间O (n²) 空间：O (nlogn)
 var threeSum = function(nums) {
     const res = [];
     nums.sort((a,b) => a - b);
