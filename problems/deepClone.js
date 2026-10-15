@@ -17,8 +17,7 @@ function deepClone(target, cache = new WeakMap()) {
       dist = new RegExp(target.source, target.flags);
     } else if (target instanceof Date) {
       dist = new Date(target);
-    } 
-     else if (target instanceof Map) {
+    } else if (target instanceof Map) {
       dist = new Map();
       // 先缓存，防止循环引用
       cache.set(target, dist);
@@ -27,20 +26,16 @@ function deepClone(target, cache = new WeakMap()) {
         dist.set(key, deepClone(value, cache));
       });
       return dist;
-    }
-    else if (target instanceof Set) {
+    } else if (target instanceof Set) {
       dist = new Set();
       cache.set(target, dist);
       target.forEach(value => {
         dist.add(deepClone(value, cache));
       });
       return dist;
-    }
-    // 普通对象
-    else {
+    } else {// 普通对象
       dist = {};
     }
-
     // 存入缓存，解决循环引用
     cache.set(target, dist);
 
