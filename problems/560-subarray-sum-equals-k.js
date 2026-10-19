@@ -3,6 +3,7 @@
  * @param {number} k
  * @return {number}
  */
+// 和为 K 的子数组 O(n) O(n)
 var subarraySum = function(nums, k) {
    let map = new Map();
    map.set(0,1);// 初始化前缀和0出现1次
