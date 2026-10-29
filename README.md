@@ -10,11 +10,8 @@
 ## 📊 刷题统计
 
 <!-- STATS:START -->
-> 请先在 `config.json` 填入你的 LeetCode 中国站用户名，然后运行：
-> ```bash
-> python scripts/update_readme.py
-> ```
-> 或配置 GitHub Actions 实现每日自动更新。
+> 自动统计暂未成功。请检查 `config.json` 中的 `leetcode_cn_username` 是否为你的 LeetCode 中国站用户名，
+> 并运行 `python scripts/update_readme.py` 手动更新。
 <!-- STATS:END -->
 
 ---
