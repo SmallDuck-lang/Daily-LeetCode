@@ -3,7 +3,7 @@ Promise.myAllSettled = function (promises) {
     if (typeof promises[Symbol.iterator] !== 'function') {
         return Promise.reject(new TypeError('传入的参数必须是可迭代对象'));
     }
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const promiseArr = Array.from(promises);//兼容一下map set(属于可迭代对象范围里)
         let len = promiseArr.length;
         let count = 0;
