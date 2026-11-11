@@ -1,3 +1,4 @@
+// 实现Promise.all方法：只要一个失败那么结果就是失败
 Promise.myAll = function(promises){
     if(typeof promises[Symbol.iterator] !== 'function'){
         return Promise.reject(new TypeError('必须是可迭代对象'))

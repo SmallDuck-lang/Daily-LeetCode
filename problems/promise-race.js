@@ -1,3 +1,4 @@
+// 实现promise.race方法：谁先完成结果就是谁的状态
 Promise.myRace = function(promises){
     if(typeof promises[Symbol.iterator] !== 'function'){
         return Promise.reject(new TypeError('必须是可迭代对象'))
