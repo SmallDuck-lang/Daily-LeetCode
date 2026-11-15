@@ -7,8 +7,14 @@ function deepClone(target, cache = new WeakMap()) {
     let dist;
 
     // 是：数组 / 函数 / 正则 / 日期 / Map / Set 就要一步一步复制，先造空壳
+    // 数组/Map/Set用的是for of单独写在他们if里面,其余用for in 写在if外面统一处理
     if (Array.isArray(target)) {
       dist = [];
+      cache.set(target, dist);
+      for (const item of target) {
+        dist.push(deepClone(item, cache));
+      }
+      return dist;
     } else if (target instanceof Function) {
       dist = function () {
         return target.call(this, ...arguments);
@@ -22,16 +28,16 @@ function deepClone(target, cache = new WeakMap()) {
       // 先缓存，防止循环引用
       cache.set(target, dist);
       // 递归克隆每一项
-      target.forEach((value, key) => {
+       for (const [key, value] of target) {
         dist.set(key, deepClone(value, cache));
-      });
+      }
       return dist;
     } else if (target instanceof Set) {
       dist = new Set();
       cache.set(target, dist);
-      target.forEach(value => {
+      for (const value of target) {
         dist.add(deepClone(value, cache));
-      });
+      }
       return dist;
     } else {// 普通对象
       dist = {};
